@@ -3,55 +3,55 @@
 # スクリプトがエラーで停止するように設定
 set -e
 
-# --- 変数定義 ---
-# 特定のバージョンを固定する必要がなければ、変数は不要です。
-# dnfでリポジトリから最新版をインストールします。
-# もし特定のバージョンが必要な場合は、dnfコマンドでバージョンを指定してください。
-# 例: dnf -y install ansible-core-2.16.7-1.el9
+# --- Variable definitions ---
+# Variables are not required if you don't need to pin specific versions.
+# We'll install the latest versions from the repository using dnf.
+# If you need specific versions, specify them in the dnf command.
+# Example: dnf -y install ansible-core-2.16.7-1.el9
 # ANSIBLE_VERSION="2.16.7"
 # ANSIBLE_LINT_VERSION="6.22.1"
 
-# --- 事前チェック ---
-# ルート権限で実行されているか確認
+# --- Pre-checks ---
+# Check if running with root privileges
 if [ "${EUID:-${UID}}" -ne 0 ]; then
-    echo "警告: このスクリプトはroot権限で実行する必要があります。" >&2
+    echo "Warning: This script must be run with root privileges." >&2
     exit 1
 fi
 
-# OSがCentOS Stream 9であるか確認
+# Check if OS is CentOS Stream 9
 if ! grep -q "CentOS Stream release 9" /etc/redhat-release; then
-    echo "警告: このスクリプトはCentOS Stream 9での実行を想定しています。" >&2
+    echo "Warning: This script is intended for execution on CentOS Stream 9." >&2
     exit 1
 fi
 
-# --- パッケージ管理とインストール ---
-echo "INFO: パッケージキャッシュを更新します。"
+# --- Package management and installation ---
+echo "INFO: Updating package cache."
 dnf makecache
 
-echo "INFO: システムを最新の状態に更新します。"
+echo "INFO: Updating system to the latest state."
 dnf -y update
 
-echo "INFO: EPELリポジトリをインストールします。"
-# CentOS Stream 9では 'crb' リポジトリを有効にする必要があります
+echo "INFO: Installing EPEL repository."
+# For CentOS Stream 9, the 'crb' repository must be enabled
 dnf config-manager --set-enabled crb
 dnf -y install epel-release epel-next-release
 
-echo "INFO: Gitをインストールします。"
+echo "INFO: Installing Git."
 dnf -y install git
 
-echo "INFO: Ansibleのコアパッケージをインストールします。"
-# Ansibleパッケージは'ansible-core'という名前で提供されています
+echo "INFO: Installing Ansible core package."
+# Ansible package is provided under the name 'ansible-core'
 dnf -y install ansible-core
 
-echo "INFO: Ansible Lintをインストールします。"
-# ansible-lintはPythonのpip経由でのインストールが公式で推奨されています
-# dnfでもインストール可能ですが、最新版を使いたい場合はpipが良いでしょう
+echo "INFO: Installing Ansible Lint."
+# ansible-lint is officially recommended to be installed via Python's pip
+# It can also be installed with dnf, but pip is better for the latest version
 dnf -y install ansible-lint
 
 
-# --- インストール確認 ---
+# --- Installation verification ---
 echo "----------------------------------------"
-echo "INFO: インストールが完了しました。バージョン情報を確認します。"
+echo "INFO: Installation completed. Checking version information."
 echo ""
 echo "Git version:"
 git --version
