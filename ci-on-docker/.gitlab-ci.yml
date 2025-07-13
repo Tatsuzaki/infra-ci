@@ -5,10 +5,12 @@ stages:
 Setup_Clients_Env:
   stage: initialize
   image:
-    name: centos:7
+    name: almalinux:8
   script:
-    - yum install -y epel-release
-    - yum install -y ansible docker-client
+    # Install EPEL and required packages
+    - dnf install -y epel-release
+    - dnf install -y ansible docker-ce-cli python3-pip
+    # Verify installations
     - docker version
     - ANSIBLE_CONFIG=./ansible.cfg ansible --version
     - ANSIBLE_CONFIG=./ansible.cfg ansible all -i hosts -c docker -m ping

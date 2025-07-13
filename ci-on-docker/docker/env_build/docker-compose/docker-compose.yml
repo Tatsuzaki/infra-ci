@@ -1,84 +1,83 @@
-version: "3.6"
-
 x-template: &template
-  image: centos:7.3.1611
-  privileged: true
+  image: almalinux:8
+  platform: linux/arm64
+  privileged: false
   command: /sbin/init
   restart: always
 
 services:
   gitlab:
-    image: gitlab/gitlab-ce:10.8.4-ce.0
+    image: gitlab/gitlab-ce:latest
+    platform: linux/arm64
     container_name: gitlab
     hostname: gitlab
     restart: always
+    environment:
+      GITLAB_ROOT_PASSWORD: 'infraci@GL' # 任意のパスワードを設定
     volumes:
       - ./volumes/gitlab.rb:/etc/gitlab/gitlab.rb
     ports:
-      - "8080:80"
+      - '8080:80'
+      - '4567:4567' # レジストリ用
     networks:
-      infraci_nw:
-        ipv4_address: 192.168.33.10
+      - infraci_nw
+
   gitlab-runner:
-    image: gitlab/gitlab-runner:v10.8.0
+    image: gitlab/gitlab-runner:alpine
+    platform: linux/arm64
     container_name: gitlab-runner
     hostname: gitlab-runner
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      infraci_nw:
-        ipv4_address: 192.168.33.11
+      - infraci_nw
+
   client1:
     <<: *template
     container_name: client1
     hostname: client1
     ports:
-      - "8082:80"
+      - '8082:80'
     networks:
-      infraci_nw:
-        ipv4_address: 192.168.33.12
+      - infraci_nw
+
   client2:
     <<: *template
     container_name: client2
     hostname: client2
     ports:
-      - "8083:80"
+      - '8083:80'
     networks:
-      infraci_nw:
-        ipv4_address: 192.168.33.13
+      - infraci_nw
+
   client3:
     <<: *template
     container_name: client3
     hostname: client3
     ports:
-      - "8084:80"
+      - '8084:80'
     networks:
-      infraci_nw:
-        ipv4_address: 192.168.33.14
+      - infraci_nw
+
   client4:
     <<: *template
     container_name: client4
     hostname: client4
     ports:
-      - "8085:80"
+      - '8085:80'
     networks:
-      infraci_nw:
-        ipv4_address: 192.168.33.15
+      - infraci_nw
+
   console:
     <<: *template
     container_name: console
     hostname: console
     ports:
-      - "2222:22"
+      - '2222:22'
     networks:
-      infraci_nw:
-        ipv4_address: 192.168.33.99
+      - infraci_nw
 
 networks:
   infraci_nw:
     driver: bridge
-    ipam:
-      driver: default
-      config:
-      - subnet: 192.168.33.0/24

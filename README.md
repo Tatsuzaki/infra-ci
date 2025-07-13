@@ -1,1 +1,3 @@
-# infra-ci
+# infra-ci(Mac向け)
+
+---
